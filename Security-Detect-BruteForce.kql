@@ -1,0 +1,13 @@
+// Detectar posible ataque de fuerza bruta: Múltiples fallos seguidos de un éxito
+// Útil para auditorías de seguridad y modelo Zero Trust
+let threshold = 5; // Número de intentos fallidos permitidos
+let timeframe = 1h; // Ventana de tiempo a analizar
+SigninLogs
+| where TimeGenerated > ago(timeframe)
+| summarize 
+    FailedAttempts = countif(ResultType != 0), 
+    SuccessfulAttempts = countif(ResultType == 0) 
+    by UserPrincipalName, IPAddress
+| where FailedAttempts >= threshold and SuccessfulAttempts > 0
+| project UserPrincipalName, IPAddress, FailedAttempts, SuccessfulAttempts
+| order by FailedAttempts desc
