@@ -1,0 +1,8 @@
+// Identificar Máquinas Virtuales con picos de CPU sostenidos (Mayor al 90% en los últimos 30 minutos)
+// Útil para prevenir caídas de servicio y asegurar el SLA
+Perf
+| where TimeGenerated > ago(30m)
+| where ObjectName == "Processor" and CounterName == "% Processor Time" and InstanceName == "_Total"
+| summarize AvgCPU = avg(CounterValue) by Computer
+| where AvgCPU > 90
+| render barchart title="Máquinas Virtuales con CPU Crítica (>90%)"
